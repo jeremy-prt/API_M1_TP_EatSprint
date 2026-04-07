@@ -20,6 +20,13 @@ export const LoginBody = Type.Object(
   { additionalProperties: false },
 );
 
+export const RefreshBody = Type.Object(
+  {
+    refreshToken: Type.String(),
+  },
+  { additionalProperties: false },
+);
+
 export const UserResponse = Type.Object({
   id: Type.Number(),
   email: Type.String(),
@@ -34,7 +41,8 @@ export const UserResponse = Type.Object({
 
 export const AuthResponse = Type.Object({
   user: UserResponse,
-  token: Type.String(),
+  accessToken: Type.String(),
+  refreshToken: Type.String(),
 });
 
 export const MeResponse = Type.Object({
