@@ -1,0 +1,112 @@
+import bcrypt from "bcrypt";
+import prisma from "../lib/prisma.js";
+import { ConflictError, NotFoundError } from "../common/exceptions.js";
+
+const SALT_ROUNDS = parseInt(process.env["BCRYPT_SALT_ROUNDS"] || "10");
+
+function generateSlug(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+interface CreateRestaurantInput {
+  name: string;
+  address: string;
+  city: string;
+  category: string;
+  image: string;
+  cuisine: string;
+  priceRange: string;
+  deliveryTimeMin: number;
+  ownerEmail: string;
+  ownerPassword: string;
+  ownerName: string;
+}
+
+interface UpdateRestaurantInput {
+  name?: string;
+  address?: string;
+  city?: string;
+  category?: string;
+  image?: string;
+  cuisine?: string;
+  priceRange?: string;
+  deliveryTimeMin?: number;
+}
+
+export async function createRestaurant(input: CreateRestaurantInput) {
+  const existingUser = await prisma.user.findUnique({
+    where: { email: input.ownerEmail },
+  });
+
+  if (existingUser) {
+    throw new ConflictError("Email du propriétaire déjà utilisé");
+  }
+
+  const hashedPassword = await bcrypt.hash(input.ownerPassword, SALT_ROUNDS);
+  const slug = generateSlug(input.name);
+
+  const restaurant = await prisma.restaurant.create({
+    data: {
+      name: input.name,
+      address: input.address,
+      city: input.city,
+      category: input.category,
+      image: input.image,
+      cuisine: input.cuisine,
+      priceRange: input.priceRange,
+      deliveryTimeMin: input.deliveryTimeMin,
+      slug,
+      owner: {
+        create: {
+          email: input.ownerEmail,
+          password: hashedPassword,
+          name: input.ownerName,
+          role: "RESTAURANT_OWNER",
+        },
+      },
+    },
+  });
+
+  return restaurant;
+}
+
+export async function getAllRestaurants() {
+  return prisma.restaurant.findMany({
+    orderBy: { name: "asc" },
+  });
+}
+
+export async function getMyRestaurants(userId: number) {
+  return prisma.restaurant.findMany({
+    where: { ownerId: userId },
+  });
+}
+
+export async function updateMyRestaurant(
+  userId: number,
+  input: UpdateRestaurantInput,
+) {
+  const restaurant = await prisma.restaurant.findFirst({
+    where: { ownerId: userId },
+  });
+
+  if (!restaurant) {
+    throw new NotFoundError("Aucun restaurant trouvé");
+  }
+
+  const data: UpdateRestaurantInput & { slug?: string } = { ...input };
+
+  if (input.name) {
+    data.slug = generateSlug(input.name);
+  }
+
+  return prisma.restaurant.update({
+    where: { id: restaurant.id },
+    data,
+  });
+}

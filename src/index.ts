@@ -3,6 +3,7 @@ import Fastify, { type FastifyError } from "fastify";
 import jwtPlugin from "./plugins/jwt.js";
 import authDecorators from "./decorators/auth.js";
 import authRoutes from "./routes/auth.js";
+import restaurantRoutes from "./routes/restaurants.js";
 import { AppError } from "./common/exceptions.js";
 
 const server = Fastify({ logger: true });
@@ -27,6 +28,7 @@ server.setErrorHandler((error: FastifyError | AppError, _request, reply) => {
 server.register(jwtPlugin);
 server.register(authDecorators);
 server.register(authRoutes, { prefix: "/auth" });
+server.register(restaurantRoutes, { prefix: "/restaurants" });
 
 server.listen({ port: 3000 }, (err, address) => {
   if (err) {
