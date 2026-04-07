@@ -4,7 +4,7 @@ import {
   createRestaurant,
   getAllRestaurants,
   getMyRestaurants,
-  updateMyRestaurant,
+  updateRestaurant,
 } from "../services/restaurant.service.js";
 import {
   CreateRestaurantBody,
@@ -64,20 +64,26 @@ export default async function restaurantRoutes(fastify: FastifyInstance) {
     },
   );
 
-  fastify.patch<{ Body: Static<typeof UpdateRestaurantBody> }>(
-    "/me",
+  fastify.put<{
+    Params: { restaurantId: string };
+    Body: Static<typeof UpdateRestaurantBody>;
+  }>(
+    "/:restaurantId",
     {
       preHandler: [fastify.authorize(["RESTAURANT_OWNER"])],
       schema: {
         body: UpdateRestaurantBody,
         response: {
           200: RestaurantResponse,
+          403: ErrorResponse,
           404: ErrorResponse,
         },
       },
     },
     async (request, reply) => {
-      const restaurant = await updateMyRestaurant(
+      const restaurantId = parseInt(request.params.restaurantId);
+      const restaurant = await updateRestaurant(
+        restaurantId,
         request.user.id,
         request.body,
       );

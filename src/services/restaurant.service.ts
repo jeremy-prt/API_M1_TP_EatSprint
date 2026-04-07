@@ -1,6 +1,10 @@
 import bcrypt from "bcrypt";
 import prisma from "../lib/prisma.js";
-import { ConflictError, NotFoundError } from "../common/exceptions.js";
+import {
+  ConflictError,
+  NotFoundError,
+  ForbiddenError,
+} from "../common/exceptions.js";
 
 const SALT_ROUNDS = parseInt(process.env["BCRYPT_SALT_ROUNDS"] || "10");
 
@@ -87,16 +91,23 @@ export async function getMyRestaurants(userId: number) {
   });
 }
 
-export async function updateMyRestaurant(
+export async function updateRestaurant(
+  restaurantId: number,
   userId: number,
   input: UpdateRestaurantInput,
 ) {
-  const restaurant = await prisma.restaurant.findFirst({
-    where: { ownerId: userId },
+  const restaurant = await prisma.restaurant.findUnique({
+    where: { id: restaurantId },
   });
 
   if (!restaurant) {
-    throw new NotFoundError("Aucun restaurant trouvé");
+    throw new NotFoundError("Restaurant introuvable");
+  }
+
+  if (restaurant.ownerId !== userId) {
+    throw new ForbiddenError(
+      "Vous n'êtes pas le propriétaire de ce restaurant",
+    );
   }
 
   const data: UpdateRestaurantInput & { slug?: string } = { ...input };
