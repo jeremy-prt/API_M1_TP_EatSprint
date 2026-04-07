@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -10,4 +5,112 @@ generator client {
 
 datasource db {
   provider = "mysql"
+}
+
+enum UserRole {
+  CUSTOMER
+  RESTAURANT_OWNER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  DELIVERING
+  DELIVERED
+  CANCELLED
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  email      String   @unique
+  password   String
+  name       String
+  address    String?
+  city       String?
+  zipCode    String?  @map("zip_code")
+  role       UserRole @default(CUSTOMER)
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  restaurants Restaurant[]
+  orders      Order[]
+
+  @@map("users")
+}
+
+model Restaurant {
+  id              Int      @id @default(autoincrement())
+  name            String
+  address         String
+  city            String
+  category        String
+  image           String
+  cuisine         String
+  rating          Float    @default(0)
+  reviewCount     Int      @default(0) @map("review_count")
+  priceRange      String   @map("price_range")
+  deliveryTimeMin Int      @map("delivery_time_min")
+  slug            String   @unique
+  ownerId         Int?     @map("owner_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  owner  User?  @relation(fields: [ownerId], references: [id], onDelete: SetNull)
+  dishes Dish[]
+
+  @@map("restaurants")
+}
+
+model Dish {
+  id              Int      @id @default(autoincrement())
+  name            String
+  slug            String   @unique
+  price           Float
+  description     String   @db.Text
+  category        String
+  restaurantId    Int      @map("restaurant_id")
+  calories        Int
+  preparationTime Int      @map("preparation_time")
+  isVegetarian    Boolean  @default(false) @map("is_vegetarian")
+  isVegan         Boolean  @default(false) @map("is_vegan")
+  isSpicy         Boolean  @default(false) @map("is_spicy")
+  allergens       String?
+  isAvailable     Boolean  @default(true) @map("is_available")
+  image           String
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
+
+  @@map("dishes")
+}
+
+model Order {
+  id        Int         @id @default(autoincrement())
+  userId    Int         @map("user_id")
+  status    OrderStatus @default(PENDING)
+  total     Float
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+
+  user  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        Int   @id @default(autoincrement())
+  orderId   Int   @map("order_id")
+  dishId    Int   @map("dish_id")
+  quantity  Int
+  unitPrice Float @map("unit_price")
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  dish  Dish  @relation(fields: [dishId], references: [id], onDelete: Cascade)
+
+  @@map("order_items")
 }
