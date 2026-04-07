@@ -284,6 +284,190 @@ paths:
         "404":
           description: Restaurant introuvable
 
+  /restaurants/{restaurantId}/dishes:
+    get:
+      summary: Plats d'un restaurant
+      tags: [Dishes]
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        "200":
+          description: Liste des plats
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Dish"
+    post:
+      summary: Créer un plat (RESTAURANT_OWNER)
+      tags: [Dishes]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                [
+                  name,
+                  price,
+                  description,
+                  category,
+                  calories,
+                  preparationTime,
+                  isVegetarian,
+                  isVegan,
+                  isSpicy,
+                  isAvailable,
+                  image,
+                ]
+              properties:
+                name:
+                  type: string
+                  example: Margherita
+                price:
+                  type: number
+                  example: 9.5
+                description:
+                  type: string
+                  example: Tomate, mozzarella, basilic
+                category:
+                  type: string
+                  example: Pizza
+                calories:
+                  type: integer
+                  example: 800
+                preparationTime:
+                  type: integer
+                  example: 15
+                isVegetarian:
+                  type: boolean
+                  example: true
+                isVegan:
+                  type: boolean
+                  example: false
+                isSpicy:
+                  type: boolean
+                  example: false
+                allergens:
+                  type: string
+                  nullable: true
+                  example: gluten, lactose
+                isAvailable:
+                  type: boolean
+                  example: true
+                image:
+                  type: string
+                  example: https://img.com/margherita.jpg
+      responses:
+        "201":
+          description: Plat créé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dish"
+        "403":
+          description: Pas propriétaire
+        "404":
+          description: Restaurant introuvable
+
+  /dishes/{dishId}:
+    get:
+      summary: Détails d'un plat
+      tags: [Dishes]
+      parameters:
+        - name: dishId
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        "200":
+          description: Plat
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dish"
+        "404":
+          description: Plat introuvable
+    put:
+      summary: Modifier un plat (RESTAURANT_OWNER)
+      tags: [Dishes]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: dishId
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Margherita Royale
+                price:
+                  type: number
+                  example: 11.5
+                description:
+                  type: string
+                category:
+                  type: string
+                isAvailable:
+                  type: boolean
+      responses:
+        "200":
+          description: Plat modifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dish"
+        "403":
+          description: Pas propriétaire
+        "404":
+          description: Plat introuvable
+    delete:
+      summary: Supprimer un plat (RESTAURANT_OWNER)
+      tags: [Dishes]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: dishId
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        "200":
+          description: Supprimé
+        "403":
+          description: Pas propriétaire
+        "404":
+          description: Plat introuvable
+
 components:
   securitySchemes:
     bearerAuth:
@@ -317,6 +501,44 @@ components:
         updatedAt:
           type: string
 
+    Dish:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        slug:
+          type: string
+        price:
+          type: number
+        description:
+          type: string
+        category:
+          type: string
+        restaurantId:
+          type: integer
+        calories:
+          type: integer
+        preparationTime:
+          type: integer
+        isVegetarian:
+          type: boolean
+        isVegan:
+          type: boolean
+        isSpicy:
+          type: boolean
+        allergens:
+          type: string
+          nullable: true
+        isAvailable:
+          type: boolean
+        image:
+          type: string
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
     AuthResponse:
       type: object
       properties:
