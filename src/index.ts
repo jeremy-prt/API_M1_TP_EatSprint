@@ -5,6 +5,7 @@ import authDecorators from "./decorators/auth.js";
 import authRoutes from "./routes/auth.js";
 import restaurantRoutes from "./routes/restaurants.js";
 import dishRoutes from "./routes/dishes.js";
+import orderRoutes from "./routes/orders.js";
 import { AppError } from "./common/exceptions.js";
 
 const server = Fastify({ logger: true });
@@ -31,6 +32,7 @@ server.register(authDecorators);
 server.register(authRoutes, { prefix: "/auth" });
 server.register(restaurantRoutes, { prefix: "/restaurants" });
 server.register(dishRoutes);
+server.register(orderRoutes);
 
 server.listen({ port: 3000 }, (err, address) => {
   if (err) {
