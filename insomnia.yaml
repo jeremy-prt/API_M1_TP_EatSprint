@@ -137,6 +137,153 @@ paths:
         "401":
           description: Non authentifié
 
+  /restaurants:
+    get:
+      summary: Liste des restaurants
+      tags: [Restaurants]
+      responses:
+        "200":
+          description: Liste
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Restaurant"
+    post:
+      summary: Créer un restaurant (ADMIN)
+      tags: [Restaurants]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                [
+                  name,
+                  address,
+                  city,
+                  category,
+                  image,
+                  cuisine,
+                  priceRange,
+                  deliveryTimeMin,
+                  ownerEmail,
+                  ownerPassword,
+                  ownerName,
+                ]
+              properties:
+                name:
+                  type: string
+                  example: Pizza Palace
+                address:
+                  type: string
+                  example: 10 rue de Rome
+                city:
+                  type: string
+                  example: Paris
+                category:
+                  type: string
+                  example: Italien
+                image:
+                  type: string
+                  example: https://img.com/pizza.jpg
+                cuisine:
+                  type: string
+                  example: Pizza
+                priceRange:
+                  type: string
+                  example: "€€"
+                deliveryTimeMin:
+                  type: integer
+                  example: 30
+                ownerEmail:
+                  type: string
+                  example: resto@test.com
+                ownerPassword:
+                  type: string
+                  example: "123456"
+                ownerName:
+                  type: string
+                  example: Chef Luigi
+      responses:
+        "201":
+          description: Restaurant créé
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Restaurant"
+        "409":
+          description: Email déjà utilisé
+
+  /restaurants/mine:
+    get:
+      summary: Mes restaurants (RESTAURANT_OWNER)
+      tags: [Restaurants]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Liste de ses restaurants
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Restaurant"
+
+  /restaurants/{restaurantId}:
+    put:
+      summary: Modifier un restaurant (RESTAURANT_OWNER)
+      tags: [Restaurants]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: restaurantId
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: Pizza Palace Deluxe
+                address:
+                  type: string
+                city:
+                  type: string
+                category:
+                  type: string
+                image:
+                  type: string
+                cuisine:
+                  type: string
+                priceRange:
+                  type: string
+                deliveryTimeMin:
+                  type: integer
+      responses:
+        "200":
+          description: Restaurant modifié
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Restaurant"
+        "403":
+          description: Pas propriétaire
+        "404":
+          description: Restaurant introuvable
+
 components:
   securitySchemes:
     bearerAuth:
@@ -178,4 +325,39 @@ components:
         accessToken:
           type: string
         refreshToken:
+          type: string
+
+    Restaurant:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        category:
+          type: string
+        image:
+          type: string
+        cuisine:
+          type: string
+        rating:
+          type: number
+        reviewCount:
+          type: integer
+        priceRange:
+          type: string
+        deliveryTimeMin:
+          type: integer
+        slug:
+          type: string
+        ownerId:
+          type: integer
+          nullable: true
+        createdAt:
+          type: string
+        updatedAt:
           type: string
