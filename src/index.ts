@@ -4,6 +4,7 @@ import jwtPlugin from "./plugins/jwt.js";
 import authDecorators from "./decorators/auth.js";
 import authRoutes from "./routes/auth.js";
 import restaurantRoutes from "./routes/restaurants.js";
+import dishRoutes from "./routes/dishes.js";
 import { AppError } from "./common/exceptions.js";
 
 const server = Fastify({ logger: true });
@@ -29,6 +30,7 @@ server.register(jwtPlugin);
 server.register(authDecorators);
 server.register(authRoutes, { prefix: "/auth" });
 server.register(restaurantRoutes, { prefix: "/restaurants" });
+server.register(dishRoutes);
 
 server.listen({ port: 3000 }, (err, address) => {
   if (err) {
