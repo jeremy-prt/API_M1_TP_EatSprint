@@ -468,6 +468,70 @@ paths:
         "404":
           description: Plat introuvable
 
+  /users/me:
+    get:
+      summary: Mon profil
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Profil
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: "#/components/schemas/User"
+    put:
+      summary: Modifier mon profil
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: John Updated
+                email:
+                  type: string
+                  example: new@test.com
+                address:
+                  type: string
+                  example: 12 rue de Paris
+                city:
+                  type: string
+                  example: Paris
+                zipCode:
+                  type: string
+                  example: "75001"
+      responses:
+        "200":
+          description: Profil modifié
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: "#/components/schemas/User"
+        "409":
+          description: Email déjà utilisé
+    delete:
+      summary: Supprimer mon compte
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Compte supprimé
+
   /orders:
     post:
       summary: Créer une commande (CUSTOMER)
