@@ -2,6 +2,7 @@ import "dotenv/config";
 import Fastify, { type FastifyError } from "fastify";
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
+import websocket from "@fastify/websocket";
 import jwtPlugin from "./plugins/jwt.js";
 import authDecorators from "./decorators/auth.js";
 import authRoutes from "./routes/auth.js";
@@ -9,6 +10,7 @@ import restaurantRoutes from "./routes/restaurants.js";
 import dishRoutes from "./routes/dishes.js";
 import orderRoutes from "./routes/orders.js";
 import userRoutes from "./routes/users.js";
+import websocketRoutes from "./routes/websocket.js";
 import { AppError } from "./common/exceptions.js";
 
 const server = Fastify({ logger: true });
@@ -43,6 +45,7 @@ server.register(cors, {
   credentials: true,
 });
 server.register(helmet);
+server.register(websocket);
 server.register(jwtPlugin);
 server.register(authDecorators);
 server.register(authRoutes, { prefix: "/auth" });
@@ -50,6 +53,7 @@ server.register(restaurantRoutes, { prefix: "/restaurants" });
 server.register(dishRoutes);
 server.register(orderRoutes);
 server.register(userRoutes, { prefix: "/users" });
+server.register(websocketRoutes);
 
 server.listen({ port: 3000 }, (err, address) => {
   if (err) {

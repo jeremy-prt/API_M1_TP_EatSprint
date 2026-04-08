@@ -4,6 +4,7 @@ import {
   NotFoundError,
   ForbiddenError,
 } from "../common/exceptions.js";
+import { notifyRestaurant } from "./websocket.service.js";
 import type { OrderStatus } from "../generated/prisma/client.js";
 
 const VALID_TRANSITIONS: Record<string, string[]> = {
@@ -67,6 +68,13 @@ export async function createOrder(
         include: { dish: { select: { id: true, name: true, image: true } } },
       },
     },
+  });
+
+  notifyRestaurant(restaurantId, "new-order", {
+    orderId: order.id,
+    totalPrice: order.total,
+    itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
+    createdAt: order.createdAt,
   });
 
   return order;
