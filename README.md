@@ -29,4 +29,8 @@ npm run dev
 | `/dishes/:id`             | CRUD plats                            |
 | `/orders`                 | Commandes (création, liste, statuts)  |
 
-`insomnia.yaml` pour import la collection complète si besoin (dans insomnia en gros équivalent postman)
+## WebSocket
+
+Route `/ws/restaurant` pour les notifications temps réel des restaurants (nouvelles commandes). Auth par JWT envoyé dans le premier message.
+
+`insomnia.yaml` pour import la collection REST complète (Insomnia ou Postman)
