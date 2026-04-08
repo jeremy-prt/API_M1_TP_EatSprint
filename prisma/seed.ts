@@ -1,4 +1,6 @@
 import "dotenv/config";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import bcrypt from "bcrypt";
 import { PrismaClient } from "../src/generated/prisma/client.js";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
@@ -12,6 +14,39 @@ const adapter = new PrismaMariaDb({
 
 const prisma = new PrismaClient({ adapter });
 
+function parseCsv(filePath: string) {
+  const content = readFileSync(resolve(filePath), "utf-8");
+  const lines = content.split("\n").filter((line) => line.trim());
+  const headers = lines[0]!.split(",");
+  const rows: Record<string, string>[] = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const values: string[] = [];
+    let current = "";
+    let inQuotes = false;
+
+    for (const char of lines[i]!) {
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === "," && !inQuotes) {
+        values.push(current);
+        current = "";
+      } else {
+        current += char;
+      }
+    }
+    values.push(current);
+
+    const row: Record<string, string> = {};
+    headers.forEach((header, index) => {
+      row[header!.trim()] = values[index]?.trim() || "";
+    });
+    rows.push(row);
+  }
+
+  return rows;
+}
+
 async function main() {
   const hashedPassword = await bcrypt.hash("123456", 10);
 
@@ -23,17 +58,6 @@ async function main() {
       password: hashedPassword,
       name: "Admin",
       role: "ADMIN",
-    },
-  });
-
-  const owner = await prisma.user.upsert({
-    where: { email: "chef@pizzapalace.com" },
-    update: {},
-    create: {
-      email: "chef@pizzapalace.com",
-      password: hashedPassword,
-      name: "Chef Luigi",
-      role: "RESTAURANT_OWNER",
     },
   });
 
@@ -51,118 +75,86 @@ async function main() {
     },
   });
 
-  const restaurant = await prisma.restaurant.upsert({
-    where: { slug: "pizza-palace" },
-    update: {},
-    create: {
-      name: "Pizza Palace",
-      address: "10 rue de Rome",
-      city: "Paris",
-      category: "Italien",
-      image: "https://images.unsplash.com/photo-1513104890138-7c749659a591",
-      cuisine: "Pizza",
-      priceRange: "€€",
-      deliveryTimeMin: 30,
-      slug: "pizza-palace",
-      ownerId: owner.id,
-    },
-  });
+  const restaurantRows = parseCsv("prisma/data/restaurants.csv");
+  const dishRows = parseCsv("prisma/data/plats.csv");
 
-  const sushiOwner = await prisma.user.upsert({
-    where: { email: "chef@sushiworld.com" },
-    update: {},
-    create: {
-      email: "chef@sushiworld.com",
-      password: hashedPassword,
-      name: "Chef Takeshi",
-      role: "RESTAURANT_OWNER",
-    },
-  });
+  const oldIdToNewId = new Map<number, number>();
 
-  const sushiRestaurant = await prisma.restaurant.upsert({
-    where: { slug: "sushi-world" },
-    update: {},
-    create: {
-      name: "Sushi World",
-      address: "5 avenue du Japon",
-      city: "Lyon",
-      category: "Japonais",
-      image: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c",
-      cuisine: "Sushi",
-      priceRange: "€€€",
-      deliveryTimeMin: 40,
-      slug: "sushi-world",
-      ownerId: sushiOwner.id,
-    },
-  });
+  for (const row of restaurantRows) {
+    const oldId = parseInt(row["id"]!);
+    const slug = row["slug"]!;
 
-  await prisma.dish.upsert({
-    where: { slug: "margherita" },
-    update: {},
-    create: {
-      name: "Margherita",
-      slug: "margherita",
-      price: 9.5,
-      description: "Tomate, mozzarella, basilic frais",
-      category: "Pizza",
-      calories: 800,
-      preparationTime: 15,
-      isVegetarian: true,
-      isVegan: false,
-      isSpicy: false,
-      allergens: "gluten, lactose",
-      isAvailable: true,
-      image: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002",
-      restaurantId: restaurant.id,
-    },
-  });
+    const ownerEmail = `owner-${slug}@eatsprint.com`;
 
-  await prisma.dish.upsert({
-    where: { slug: "pepperoni" },
-    update: {},
-    create: {
-      name: "Pepperoni",
-      slug: "pepperoni",
-      price: 12.5,
-      description: "Tomate, mozzarella, pepperoni",
-      category: "Pizza",
-      calories: 950,
-      preparationTime: 15,
-      isVegetarian: false,
-      isVegan: false,
-      isSpicy: true,
-      allergens: "gluten, lactose",
-      isAvailable: true,
-      image: "https://images.unsplash.com/photo-1628840042765-356cda07504e",
-      restaurantId: restaurant.id,
-    },
-  });
+    const owner = await prisma.user.upsert({
+      where: { email: ownerEmail },
+      update: {},
+      create: {
+        email: ownerEmail,
+        password: hashedPassword,
+        name: `Gérant ${row["nom"]}`,
+        role: "RESTAURANT_OWNER",
+      },
+    });
 
-  await prisma.dish.upsert({
-    where: { slug: "salmon-sashimi" },
-    update: {},
-    create: {
-      name: "Salmon Sashimi",
-      slug: "salmon-sashimi",
-      price: 14,
-      description: "6 tranches de saumon frais",
-      category: "Sashimi",
-      calories: 300,
-      preparationTime: 10,
-      isVegetarian: false,
-      isVegan: false,
-      isSpicy: false,
-      allergens: "poisson",
-      isAvailable: true,
-      image: "https://images.unsplash.com/photo-1553621042-f6e147245754",
-      restaurantId: sushiRestaurant.id,
-    },
-  });
+    const restaurant = await prisma.restaurant.upsert({
+      where: { slug },
+      update: {},
+      create: {
+        name: row["nom"]!,
+        address: row["adresse"]!,
+        city: row["ville"]!,
+        category: row["categorie"]!,
+        image: row["image"]!,
+        cuisine: row["cuisine"]!,
+        rating: parseFloat(row["note"]!) || 0,
+        reviewCount: parseInt(row["nb_avis"]!) || 0,
+        priceRange: row["gamme_prix"]!,
+        deliveryTimeMin: parseInt(row["temps_livraison_min"]!) || 30,
+        slug,
+        ownerId: owner.id,
+      },
+    });
 
+    oldIdToNewId.set(oldId, restaurant.id);
+  }
+
+  for (const row of dishRows) {
+    const oldRestaurantId = parseInt(row["restaurant_id"]!);
+    const newRestaurantId = oldIdToNewId.get(oldRestaurantId);
+
+    if (!newRestaurantId) continue;
+
+    const slug = row["slug"]!;
+
+    await prisma.dish.upsert({
+      where: { slug },
+      update: {},
+      create: {
+        name: row["nom"]!,
+        slug,
+        price: parseFloat(row["prix"]!) || 0,
+        description: row["description"]!,
+        category: row["categorie"]!,
+        restaurantId: newRestaurantId,
+        calories: parseInt(row["calories"]!) || 0,
+        preparationTime: parseInt(row["temps_preparation_min"]!) || 15,
+        isVegetarian: row["vegetarien"] === "true",
+        isVegan: row["vegan"] === "true",
+        isSpicy: row["epice"] === "true",
+        allergens: row["allergenes"] || null,
+        isAvailable: row["disponible"] !== "false",
+        image: row["image"]!,
+      },
+    });
+  }
+
+  console.log(`Seed terminé :`);
+  console.log(`  ${restaurantRows.length} restaurants importés`);
+  console.log(`  ${dishRows.length} plats importés`);
   console.log(
-    `Seed terminé : ${admin.name}, ${owner.name}, ${sushiOwner.name}, ${customer.name}`,
+    `  Users: ${admin.name}, ${customer.name} + ${restaurantRows.length} owners`,
   );
-  console.log(`Restaurants : ${restaurant.name}, ${sushiRestaurant.name}`);
 }
 
 main()

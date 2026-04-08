@@ -59,7 +59,7 @@ model Restaurant {
   address         String
   city            String
   category        String
-  image           String
+  image           String   @db.Text
   cuisine         String
   rating          Float    @default(0)
   reviewCount     Int      @default(0) @map("review_count")
@@ -91,7 +91,7 @@ model Dish {
   isSpicy         Boolean  @default(false) @map("is_spicy")
   allergens       String?
   isAvailable     Boolean  @default(true) @map("is_available")
-  image           String
+  image           String   @db.Text
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 
