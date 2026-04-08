@@ -11,21 +11,29 @@ import { AppError } from "./common/exceptions.js";
 
 const server = Fastify({ logger: true });
 
-server.setErrorHandler((error: FastifyError | AppError, _request, reply) => {
+server.setErrorHandler((error: FastifyError | AppError, request, reply) => {
   if (error instanceof AppError) {
-    return reply
-      .status(error.statusCode)
-      .send({ error: error.message, statusCode: error.statusCode });
+    return reply.status(error.statusCode).send(error.toRFC7807(request.url));
   }
 
   if ("validation" in error && error.validation) {
-    return reply.status(400).send({ error: error.message, statusCode: 400 });
+    return reply.status(400).send({
+      type: "urn:app:error:validation",
+      title: "Validation Error",
+      status: 400,
+      detail: error.message,
+      instance: request.url,
+    });
   }
 
   server.log.error(error);
-  return reply
-    .status(500)
-    .send({ error: "Erreur interne du serveur", statusCode: 500 });
+  return reply.status(500).send({
+    type: "urn:app:error:internal",
+    title: "Internal Server Error",
+    status: 500,
+    detail: "Erreur interne du serveur",
+    instance: request.url,
+  });
 });
 
 server.register(jwtPlugin);

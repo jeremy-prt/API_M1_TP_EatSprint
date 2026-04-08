@@ -50,6 +50,9 @@ export const MeResponse = Type.Object({
 });
 
 export const ErrorResponse = Type.Object({
-  error: Type.String(),
-  statusCode: Type.Number(),
+  type: Type.String(),
+  title: Type.String(),
+  status: Type.Number(),
+  detail: Type.String(),
+  instance: Type.Optional(Type.String()),
 });
