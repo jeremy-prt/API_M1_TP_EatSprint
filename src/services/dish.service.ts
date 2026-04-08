@@ -65,10 +65,16 @@ export async function createDish(
 ) {
   await verifyRestaurantOwnership(restaurantId, userId);
 
+  let slug = generateSlug(input.name);
+  const existing = await prisma.dish.findUnique({ where: { slug } });
+  if (existing) {
+    slug = `${slug}-${Date.now()}`;
+  }
+
   return prisma.dish.create({
     data: {
       ...input,
-      slug: generateSlug(input.name),
+      slug,
       restaurantId,
     },
   });
