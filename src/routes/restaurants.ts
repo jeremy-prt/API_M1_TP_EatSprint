@@ -5,6 +5,7 @@ import {
   getAllRestaurants,
   getMyRestaurants,
   updateRestaurant,
+  deleteRestaurant,
 } from "../services/restaurant.service.js";
 import {
   CreateRestaurantBody,
@@ -101,6 +102,25 @@ export default async function restaurantRoutes(fastify: FastifyInstance) {
         request.body,
       );
       return reply.send(restaurant);
+    },
+  );
+
+  fastify.delete<{ Params: { restaurantId: string } }>(
+    "/:restaurantId",
+    {
+      preHandler: [fastify.authorize(["RESTAURANT_OWNER"])],
+      schema: {
+        response: {
+          200: Type.Object({ success: Type.Boolean() }),
+          403: ErrorResponse,
+          404: ErrorResponse,
+        },
+      },
+    },
+    async (request, reply) => {
+      const restaurantId = parseInt(request.params.restaurantId);
+      await deleteRestaurant(restaurantId, request.user.id);
+      return reply.send({ success: true });
     },
   );
 }

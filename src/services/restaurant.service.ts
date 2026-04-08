@@ -144,3 +144,21 @@ export async function updateRestaurant(
     data,
   });
 }
+
+export async function deleteRestaurant(restaurantId: number, userId: number) {
+  const restaurant = await prisma.restaurant.findUnique({
+    where: { id: restaurantId },
+  });
+
+  if (!restaurant) {
+    throw new NotFoundError("Restaurant introuvable");
+  }
+
+  if (restaurant.ownerId !== userId) {
+    throw new ForbiddenError(
+      "Vous n'êtes pas le propriétaire de ce restaurant",
+    );
+  }
+
+  await prisma.restaurant.delete({ where: { id: restaurantId } });
+}
