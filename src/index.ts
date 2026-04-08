@@ -10,6 +10,7 @@ import restaurantRoutes from "./routes/restaurants.js";
 import dishRoutes from "./routes/dishes.js";
 import orderRoutes from "./routes/orders.js";
 import userRoutes from "./routes/users.js";
+import adminRoutes from "./routes/admin.js";
 import websocketRoutes from "./routes/websocket.js";
 import graphqlPlugin from "./graphql/index.js";
 import { AppError } from "./common/exceptions.js";
@@ -64,6 +65,7 @@ server.register(restaurantRoutes, { prefix: "/restaurants" });
 server.register(dishRoutes);
 server.register(orderRoutes);
 server.register(userRoutes, { prefix: "/users" });
+server.register(adminRoutes, { prefix: "/admin" });
 server.register(websocketRoutes);
 server.register(graphqlPlugin);
 
