@@ -47,6 +47,18 @@ export const schema = `
     dish: Dish
   }
 
+  type User {
+    id: Int!
+    email: String!
+    name: String!
+    address: String
+    city: String
+    zipCode: String
+    role: String!
+    createdAt: String!
+    updatedAt: String!
+  }
+
   type Order {
     id: Int!
     userId: Int!
@@ -60,7 +72,9 @@ export const schema = `
   type Query {
     restaurants(limit: Int, offset: Int, city: String, category: String): [Restaurant!]!
     restaurant(id: Int!): Restaurant
+    dishes(restaurantId: Int!, limit: Int, offset: Int): [Dish!]!
     dish(id: Int!): Dish
+    me: User
     myOrders: [Order!]!
   }
 `;

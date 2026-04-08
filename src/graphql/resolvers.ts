@@ -28,8 +28,35 @@ export const resolvers = {
       return prisma.restaurant.findUnique({ where: { id: args.id } });
     },
 
+    dishes: async (
+      _: unknown,
+      args: { restaurantId: number; limit?: number; offset?: number },
+    ) => {
+      return prisma.dish.findMany({
+        where: { restaurantId: args.restaurantId },
+        orderBy: { name: "asc" },
+        take: args.limit ?? 20,
+        skip: args.offset ?? 0,
+      });
+    },
+
     dish: async (_: unknown, args: { id: number }) => {
       return prisma.dish.findUnique({ where: { id: args.id } });
+    },
+
+    me: async (
+      _: unknown,
+      _args: unknown,
+      context: MercuriusContext & { user?: { id: number } },
+    ) => {
+      if (!context.user) {
+        throw new Error("Non authentifié");
+      }
+
+      return prisma.user.findUnique({
+        where: { id: context.user.id },
+        omit: { password: true },
+      });
     },
 
     myOrders: async (
