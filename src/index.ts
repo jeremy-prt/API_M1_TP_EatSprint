@@ -45,7 +45,17 @@ server.register(cors, {
   origin: process.env["CORS_ORIGIN"] || "http://localhost:3001",
   credentials: true,
 });
-server.register(helmet);
+server.register(helmet, {
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com"],
+      connectSrc: ["'self'", "https://unpkg.com"],
+      imgSrc: ["'self'", "data:"],
+    },
+  },
+});
 server.register(websocket);
 server.register(jwtPlugin);
 server.register(authDecorators);
