@@ -1,5 +1,7 @@
 import "dotenv/config";
 import Fastify, { type FastifyError } from "fastify";
+import cors from "@fastify/cors";
+import helmet from "@fastify/helmet";
 import jwtPlugin from "./plugins/jwt.js";
 import authDecorators from "./decorators/auth.js";
 import authRoutes from "./routes/auth.js";
@@ -36,6 +38,11 @@ server.setErrorHandler((error: FastifyError | AppError, request, reply) => {
   });
 });
 
+server.register(cors, {
+  origin: process.env["CORS_ORIGIN"] || "http://localhost:3001",
+  credentials: true,
+});
+server.register(helmet);
 server.register(jwtPlugin);
 server.register(authDecorators);
 server.register(authRoutes, { prefix: "/auth" });
