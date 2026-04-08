@@ -74,11 +74,45 @@ export async function createDish(
   });
 }
 
-export async function getDishesByRestaurant(restaurantId: number) {
-  return prisma.dish.findMany({
-    where: { restaurantId },
-    orderBy: { name: "asc" },
-  });
+interface DishFilters {
+  limit: number;
+  offset: number;
+  category?: string;
+  isVegetarian?: boolean;
+  minPrice?: number;
+  maxPrice?: number;
+}
+
+export async function getDishesByRestaurant(
+  restaurantId: number,
+  filters: DishFilters,
+) {
+  const where: Record<string, unknown> = { restaurantId };
+
+  if (filters.category) where.category = filters.category;
+  if (filters.isVegetarian !== undefined)
+    where.isVegetarian = filters.isVegetarian;
+  if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
+    where.price = {
+      ...(filters.minPrice !== undefined && { gte: filters.minPrice }),
+      ...(filters.maxPrice !== undefined && { lte: filters.maxPrice }),
+    };
+  }
+
+  const [data, total] = await Promise.all([
+    prisma.dish.findMany({
+      where,
+      orderBy: { name: "asc" },
+      take: filters.limit,
+      skip: filters.offset,
+    }),
+    prisma.dish.count({ where }),
+  ]);
+
+  return {
+    data,
+    pagination: { total, limit: filters.limit, offset: filters.offset },
+  };
 }
 
 export async function getDishById(dishId: number) {

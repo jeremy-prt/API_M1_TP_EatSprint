@@ -1,5 +1,5 @@
 import type { FastifyInstance } from "fastify";
-import type { Static } from "@sinclair/typebox";
+import { Type, type Static } from "@sinclair/typebox";
 import {
   createRestaurant,
   getAllRestaurants,
@@ -10,23 +10,36 @@ import {
   CreateRestaurantBody,
   UpdateRestaurantBody,
   RestaurantResponse,
-  RestaurantListResponse,
 } from "../schemas/restaurant.schema.js";
+import { PaginatedResponse } from "../schemas/pagination.schema.js";
 import { ErrorResponse } from "../schemas/auth.schema.js";
 
+const RestaurantQuery = Type.Object({
+  limit: Type.Optional(Type.Number({ minimum: 1, maximum: 100, default: 20 })),
+  offset: Type.Optional(Type.Number({ minimum: 0, default: 0 })),
+  city: Type.Optional(Type.String()),
+  category: Type.Optional(Type.String()),
+});
+
 export default async function restaurantRoutes(fastify: FastifyInstance) {
-  fastify.get(
+  fastify.get<{ Querystring: Static<typeof RestaurantQuery> }>(
     "/",
     {
       schema: {
+        querystring: RestaurantQuery,
         response: {
-          200: RestaurantListResponse,
+          200: PaginatedResponse(RestaurantResponse),
         },
       },
     },
-    async (_request, reply) => {
-      const restaurants = await getAllRestaurants();
-      return reply.send(restaurants);
+    async (request, reply) => {
+      const result = await getAllRestaurants({
+        limit: request.query.limit ?? 20,
+        offset: request.query.offset ?? 0,
+        city: request.query.city,
+        category: request.query.category,
+      });
+      return reply.send(result);
     },
   );
 
@@ -54,7 +67,7 @@ export default async function restaurantRoutes(fastify: FastifyInstance) {
       preHandler: [fastify.authorize(["RESTAURANT_OWNER"])],
       schema: {
         response: {
-          200: RestaurantListResponse,
+          200: Type.Array(RestaurantResponse),
         },
       },
     },

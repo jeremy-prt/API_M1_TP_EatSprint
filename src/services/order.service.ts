@@ -72,16 +72,36 @@ export async function createOrder(
   return order;
 }
 
-export async function getUserOrders(userId: number) {
-  return prisma.order.findMany({
-    where: { userId },
-    orderBy: { createdAt: "desc" },
-    include: {
-      items: {
-        include: { dish: { select: { id: true, name: true, image: true } } },
+interface OrderFilters {
+  limit: number;
+  offset: number;
+  status?: string;
+}
+
+export async function getUserOrders(userId: number, filters: OrderFilters) {
+  const where: Record<string, unknown> = { userId };
+
+  if (filters.status) where.status = filters.status;
+
+  const [data, total] = await Promise.all([
+    prisma.order.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      take: filters.limit,
+      skip: filters.offset,
+      include: {
+        items: {
+          include: { dish: { select: { id: true, name: true, image: true } } },
+        },
       },
-    },
-  });
+    }),
+    prisma.order.count({ where }),
+  ]);
+
+  return {
+    data,
+    pagination: { total, limit: filters.limit, offset: filters.offset },
+  };
 }
 
 export async function getOrderById(orderId: number, userId: number) {

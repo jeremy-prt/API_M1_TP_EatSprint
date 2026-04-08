@@ -11,24 +11,44 @@ import {
   CreateDishBody,
   UpdateDishBody,
   DishResponse,
-  DishListResponse,
 } from "../schemas/dish.schema.js";
+import { PaginatedResponse } from "../schemas/pagination.schema.js";
 import { ErrorResponse } from "../schemas/auth.schema.js";
 
+const DishQuery = Type.Object({
+  limit: Type.Optional(Type.Number({ minimum: 1, maximum: 100, default: 20 })),
+  offset: Type.Optional(Type.Number({ minimum: 0, default: 0 })),
+  category: Type.Optional(Type.String()),
+  isVegetarian: Type.Optional(Type.Boolean()),
+  minPrice: Type.Optional(Type.Number({ minimum: 0 })),
+  maxPrice: Type.Optional(Type.Number({ minimum: 0 })),
+});
+
 export default async function dishRoutes(fastify: FastifyInstance) {
-  fastify.get<{ Params: { restaurantId: string } }>(
+  fastify.get<{
+    Params: { restaurantId: string };
+    Querystring: Static<typeof DishQuery>;
+  }>(
     "/restaurants/:restaurantId/dishes",
     {
       schema: {
+        querystring: DishQuery,
         response: {
-          200: DishListResponse,
+          200: PaginatedResponse(DishResponse),
         },
       },
     },
     async (request, reply) => {
       const restaurantId = parseInt(request.params.restaurantId);
-      const dishes = await getDishesByRestaurant(restaurantId);
-      return reply.send(dishes);
+      const result = await getDishesByRestaurant(restaurantId, {
+        limit: request.query.limit ?? 20,
+        offset: request.query.offset ?? 0,
+        category: request.query.category,
+        isVegetarian: request.query.isVegetarian,
+        minPrice: request.query.minPrice,
+        maxPrice: request.query.maxPrice,
+      });
+      return reply.send(result);
     },
   );
 

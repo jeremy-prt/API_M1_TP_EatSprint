@@ -79,10 +79,33 @@ export async function createRestaurant(input: CreateRestaurantInput) {
   return restaurant;
 }
 
-export async function getAllRestaurants() {
-  return prisma.restaurant.findMany({
-    orderBy: { name: "asc" },
-  });
+interface RestaurantFilters {
+  city?: string;
+  category?: string;
+  limit: number;
+  offset: number;
+}
+
+export async function getAllRestaurants(filters: RestaurantFilters) {
+  const where: Record<string, unknown> = {};
+
+  if (filters.city) where.city = filters.city;
+  if (filters.category) where.category = filters.category;
+
+  const [data, total] = await Promise.all([
+    prisma.restaurant.findMany({
+      where,
+      orderBy: { name: "asc" },
+      take: filters.limit,
+      skip: filters.offset,
+    }),
+    prisma.restaurant.count({ where }),
+  ]);
+
+  return {
+    data,
+    pagination: { total, limit: filters.limit, offset: filters.offset },
+  };
 }
 
 export async function getMyRestaurants(userId: number) {
