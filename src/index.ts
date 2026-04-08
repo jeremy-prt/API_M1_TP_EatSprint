@@ -45,6 +45,7 @@ server.setErrorHandler((error: FastifyError | AppError, request, reply) => {
 server.register(cors, {
   origin: process.env["CORS_ORIGIN"] || "http://localhost:3001",
   credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 });
 server.register(helmet, {
   contentSecurityPolicy: {
