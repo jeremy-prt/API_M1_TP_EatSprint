@@ -115,6 +115,7 @@ export default async function websocketRoutes(fastify: FastifyInstance) {
           authSocket.socket,
         );
       }
+      socket.close(1011, "Erreur serveur");
     });
   });
 }
