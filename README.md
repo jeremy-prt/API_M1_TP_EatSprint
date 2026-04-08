@@ -14,6 +14,7 @@ npm install
 cp .env.example .env  # configurer la DB
 npx prisma migrate dev
 npx prisma generate
+npx prisma db seed    # données de test (users, restos, plats)
 npm run dev
 ```
 
