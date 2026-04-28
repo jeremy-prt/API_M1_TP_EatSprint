@@ -41,7 +41,7 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Generate Prisma client
         run: npx prisma generate
@@ -54,7 +54,7 @@ jobs:
           DATABASE_PASSWORD: eatsprint
           DATABASE_NAME: eatsprint_test
           DATABASE_URL: mysql://eatsprint:eatsprint@localhost:3306/eatsprint_test
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_SECRET: ci-test-secret
 
       - name: Build TypeScript
         run: npm run build
