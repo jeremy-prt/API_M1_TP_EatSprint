@@ -1,5 +1,22 @@
 import type { MercuriusContext } from "mercurius";
 import prisma from "../lib/prisma.js";
+import { updateUser } from "../services/user.service.js";
+import { createDish, updateDish } from "../services/dish.service.js";
+
+type AuthContext = MercuriusContext & {
+  user?: { id: number; email: string; role: string };
+};
+
+function requireAuth(ctx: AuthContext) {
+  if (!ctx.user) throw new Error("Non authentifié");
+  return ctx.user;
+}
+
+function requireRole(ctx: AuthContext, role: string) {
+  const user = requireAuth(ctx);
+  if (user.role !== role) throw new Error("Accès interdit");
+  return user;
+}
 
 export const resolvers = {
   Query: {
@@ -77,6 +94,46 @@ export const resolvers = {
           },
         },
       });
+    },
+  },
+
+  Mutation: {
+    updateMe: async (
+      _: unknown,
+      args: {
+        input: {
+          name?: string;
+          email?: string;
+          address?: string;
+          city?: string;
+          zipCode?: string;
+        };
+      },
+      context: AuthContext,
+    ) => {
+      const user = requireAuth(context);
+      return updateUser(user.id, args.input);
+    },
+
+    createDish: async (
+      _: unknown,
+      args: {
+        restaurantId: number;
+        input: Parameters<typeof createDish>[2];
+      },
+      context: AuthContext,
+    ) => {
+      const user = requireRole(context, "RESTAURANT_OWNER");
+      return createDish(args.restaurantId, user.id, args.input);
+    },
+
+    updateDish: async (
+      _: unknown,
+      args: { id: number; input: Parameters<typeof updateDish>[2] },
+      context: AuthContext,
+    ) => {
+      const user = requireRole(context, "RESTAURANT_OWNER");
+      return updateDish(args.id, user.id, args.input);
     },
   },
 

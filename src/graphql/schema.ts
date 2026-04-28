@@ -77,4 +77,42 @@ export const schema = `
     me: User
     myOrders: [Order!]!
   }
+
+  input UpdateMeInput {
+    name: String
+    email: String
+    address: String
+    city: String
+    zipCode: String
+  }
+
+  input CreateDishInput {
+    name: String!
+    price: Float!
+    description: String!
+    category: String!
+    calories: Int!
+    preparationTime: Int!
+    isVegetarian: Boolean!
+    isVegan: Boolean!
+    isSpicy: Boolean!
+    allergens: String
+    isAvailable: Boolean!
+    image: String!
+  }
+
+  input UpdateDishInput {
+    name: String
+    price: Float
+    description: String
+    category: String
+    isAvailable: Boolean
+    image: String
+  }
+
+  type Mutation {
+    updateMe(input: UpdateMeInput!): User!
+    createDish(restaurantId: Int!, input: CreateDishInput!): Dish!
+    updateDish(id: Int!, input: UpdateDishInput!): Dish!
+  }
 `;
