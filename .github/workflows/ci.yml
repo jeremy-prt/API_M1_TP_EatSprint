@@ -15,17 +15,17 @@ jobs:
       packages: write
 
     services:
-      mariadb:
-        image: mariadb:11.4
+      mysql:
+        image: mysql:8.4
         env:
-          MARIADB_ROOT_PASSWORD: root
-          MARIADB_DATABASE: eatsprint_test
-          MARIADB_USER: eatsprint
-          MARIADB_PASSWORD: eatsprint
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: eatsprint_test
+          MYSQL_USER: eatsprint
+          MYSQL_PASSWORD: eatsprint
         ports:
           - 3306:3306
         options: >-
-          --health-cmd="mariadb-admin ping -h localhost -proot"
+          --health-cmd="mysqladmin ping -h localhost -proot"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
@@ -37,7 +37,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: "npm"
 
       - name: Install dependencies

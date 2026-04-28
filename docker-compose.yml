@@ -4,37 +4,35 @@ services:
     ports:
       - "4000:3000"
     environment:
-      DATABASE_HOST: mariadb
+      DATABASE_HOST: mysql
       DATABASE_USER: ${DATABASE_USER:-eatsprint}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD:-eatsprint}
       DATABASE_NAME: ${DATABASE_NAME:-eatsprint}
-      DATABASE_URL: mysql://${DATABASE_USER:-eatsprint}:${DATABASE_PASSWORD:-eatsprint}@mariadb:3306/${DATABASE_NAME:-eatsprint}
+      DATABASE_URL: mysql://${DATABASE_USER:-eatsprint}:${DATABASE_PASSWORD:-eatsprint}@mysql:3306/${DATABASE_NAME:-eatsprint}
       JWT_SECRET: ${JWT_SECRET}
       ACCESS_TOKEN_EXPIRY: ${ACCESS_TOKEN_EXPIRY:-15m}
       REFRESH_TOKEN_EXPIRY_DAYS: ${REFRESH_TOKEN_EXPIRY_DAYS:-7}
       BCRYPT_SALT_ROUNDS: ${BCRYPT_SALT_ROUNDS:-10}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3001}
     depends_on:
-      mariadb:
+      mysql:
         condition: service_healthy
     restart: on-failure
 
-  mariadb:
-    image: mariadb:11.4
+  mysql:
+    image: mysql:8.4
     environment:
-      MARIADB_ROOT_PASSWORD: ${DATABASE_PASSWORD:-root}
-      MARIADB_DATABASE: ${DATABASE_NAME:-eatsprint}
-      MARIADB_USER: ${DATABASE_USER:-root}
-      MARIADB_PASSWORD: ${DATABASE_PASSWORD:-root}
+      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD:-root}
+      MYSQL_DATABASE: ${DATABASE_NAME:-eatsprint}
     volumes:
-      - mariadb_data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
     ports:
       - "3307:3306"
     healthcheck:
       test:
         [
           "CMD",
-          "mariadb-admin",
+          "mysqladmin",
           "ping",
           "-h",
           "localhost",
@@ -46,4 +44,4 @@ services:
     restart: on-failure
 
 volumes:
-  mariadb_data:
+  mysql_data:
