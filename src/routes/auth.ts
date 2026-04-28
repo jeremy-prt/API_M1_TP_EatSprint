@@ -52,6 +52,9 @@ export default async function authRoutes(fastify: FastifyInstance) {
   fastify.post<{ Body: Static<typeof LoginBody> }>(
     "/login",
     {
+      config: {
+        rateLimit: { max: 5, timeWindow: "1 minute" },
+      },
       schema: {
         tags: ["Auth"],
         summary: "Se connecter",
@@ -59,6 +62,7 @@ export default async function authRoutes(fastify: FastifyInstance) {
         response: {
           200: AuthResponse,
           401: ErrorResponse,
+          429: ErrorResponse,
         },
       },
     },

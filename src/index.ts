@@ -2,6 +2,7 @@ import "dotenv/config";
 import Fastify, { type FastifyError } from "fastify";
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
+import rateLimit from "@fastify/rate-limit";
 import websocket from "@fastify/websocket";
 import swaggerPlugin from "./plugins/swagger.js";
 import jwtPlugin from "./plugins/jwt.js";
@@ -33,6 +34,16 @@ server.setErrorHandler((error: FastifyError | AppError, request, reply) => {
     });
   }
 
+  if ("statusCode" in error && error.statusCode && error.statusCode < 500) {
+    return reply.status(error.statusCode).send({
+      type: `urn:app:error:${error.statusCode}`,
+      title: error.name || "Error",
+      status: error.statusCode,
+      detail: error.message,
+      instance: request.url,
+    });
+  }
+
   server.log.error(error);
   return reply.status(500).send({
     type: "urn:app:error:internal",
@@ -59,6 +70,10 @@ server.register(helmet, {
       workerSrc: ["blob:"],
     },
   },
+});
+server.register(rateLimit, {
+  max: 100,
+  timeWindow: "1 minute",
 });
 server.register(swaggerPlugin);
 server.register(websocket);
