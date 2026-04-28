@@ -23,16 +23,16 @@ cp .env.example .env
 ## Lancer avec Docker
 
 ```bash
-docker compose up --build
+docker compose up --build -d
 ```
 
-L'API démarre la DB MySQL et applique les migrations automatiquement.
+Démarre MySQL, crée la base `eatsprint`, applique les migrations Prisma puis lance l'API.
 
 - API : `http://localhost:4000`
 - Swagger : `http://localhost:4000/docs`
 - MySQL : `localhost:3307`
 
-Pour insérer les données de test :
+Pour insérer les données de test (40 restaurants, 102 plats, comptes admin/client/owners) :
 
 ```bash
 docker compose exec api npx prisma db seed
