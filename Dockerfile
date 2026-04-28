@@ -25,9 +25,12 @@ RUN npm ci --omit=dev
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/src/generated ./src/generated
 COPY prisma ./prisma
+COPY entrypoint.sh ./entrypoint.sh
+
+RUN chmod +x entrypoint.sh
 
 USER appuser
 
 EXPOSE 3000
 
-CMD ["node", "dist/index.js"]
+CMD ["./entrypoint.sh"]

@@ -2,7 +2,7 @@ services:
   api:
     build: .
     ports:
-      - "3000:3000"
+      - "4000:3000"
     environment:
       DATABASE_HOST: mariadb
       DATABASE_USER: ${DATABASE_USER:-eatsprint}
@@ -22,14 +22,14 @@ services:
   mariadb:
     image: mariadb:11.4
     environment:
-      MARIADB_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD:-root}
+      MARIADB_ROOT_PASSWORD: ${DATABASE_PASSWORD:-root}
       MARIADB_DATABASE: ${DATABASE_NAME:-eatsprint}
-      MARIADB_USER: ${DATABASE_USER:-eatsprint}
-      MARIADB_PASSWORD: ${DATABASE_PASSWORD:-eatsprint}
+      MARIADB_USER: ${DATABASE_USER:-root}
+      MARIADB_PASSWORD: ${DATABASE_PASSWORD:-root}
     volumes:
       - mariadb_data:/var/lib/mysql
     ports:
-      - "3306:3306"
+      - "3307:3306"
     healthcheck:
       test:
         [
@@ -38,7 +38,7 @@ services:
           "ping",
           "-h",
           "localhost",
-          "-p${DATABASE_ROOT_PASSWORD:-root}",
+          "-p${DATABASE_PASSWORD:-root}",
         ]
       interval: 10s
       timeout: 5s
