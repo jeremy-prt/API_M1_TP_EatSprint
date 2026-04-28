@@ -32,6 +32,8 @@ export default async function dishRoutes(fastify: FastifyInstance) {
     "/restaurants/:restaurantId/dishes",
     {
       schema: {
+        tags: ["Dishes"],
+        summary: "Lister les plats d'un restaurant",
         querystring: DishQuery,
         response: {
           200: PaginatedResponse(DishResponse),
@@ -60,6 +62,9 @@ export default async function dishRoutes(fastify: FastifyInstance) {
     {
       preHandler: [fastify.authorize(["RESTAURANT_OWNER"])],
       schema: {
+        tags: ["Dishes"],
+        summary: "Créer un plat (RESTAURANT_OWNER)",
+        security: [{ bearerAuth: [] }],
         body: CreateDishBody,
         response: {
           201: DishResponse,
@@ -83,6 +88,8 @@ export default async function dishRoutes(fastify: FastifyInstance) {
     "/dishes/:dishId",
     {
       schema: {
+        tags: ["Dishes"],
+        summary: "Détail d'un plat",
         response: {
           200: DishResponse,
           404: ErrorResponse,
@@ -104,6 +111,9 @@ export default async function dishRoutes(fastify: FastifyInstance) {
     {
       preHandler: [fastify.authorize(["RESTAURANT_OWNER"])],
       schema: {
+        tags: ["Dishes"],
+        summary: "Modifier un plat",
+        security: [{ bearerAuth: [] }],
         body: UpdateDishBody,
         response: {
           200: DishResponse,
@@ -124,6 +134,9 @@ export default async function dishRoutes(fastify: FastifyInstance) {
     {
       preHandler: [fastify.authorize(["RESTAURANT_OWNER"])],
       schema: {
+        tags: ["Dishes"],
+        summary: "Supprimer un plat",
+        security: [{ bearerAuth: [] }],
         response: {
           200: Type.Object({ success: Type.Boolean() }),
           403: ErrorResponse,

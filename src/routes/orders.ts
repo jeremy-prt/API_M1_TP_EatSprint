@@ -28,6 +28,9 @@ export default async function orderRoutes(fastify: FastifyInstance) {
     {
       preHandler: [fastify.authorize(["CUSTOMER"])],
       schema: {
+        tags: ["Orders"],
+        summary: "Passer une commande (CUSTOMER)",
+        security: [{ bearerAuth: [] }],
         body: CreateOrderBody,
         response: {
           201: OrderResponse,
@@ -50,6 +53,9 @@ export default async function orderRoutes(fastify: FastifyInstance) {
     {
       preHandler: [fastify.authorize(["CUSTOMER"])],
       schema: {
+        tags: ["Orders"],
+        summary: "Mes commandes (CUSTOMER)",
+        security: [{ bearerAuth: [] }],
         querystring: OrderQuery,
         response: {
           200: PaginatedResponse(OrderResponse),
@@ -71,6 +77,9 @@ export default async function orderRoutes(fastify: FastifyInstance) {
     {
       preHandler: [fastify.authenticate],
       schema: {
+        tags: ["Orders"],
+        summary: "Détail d'une commande",
+        security: [{ bearerAuth: [] }],
         response: {
           200: OrderResponse,
           403: ErrorResponse,
@@ -93,6 +102,9 @@ export default async function orderRoutes(fastify: FastifyInstance) {
     {
       preHandler: [fastify.authorize(["RESTAURANT_OWNER"])],
       schema: {
+        tags: ["Orders"],
+        summary: "Mettre à jour le statut d'une commande (RESTAURANT_OWNER)",
+        security: [{ bearerAuth: [] }],
         body: UpdateStatusBody,
         response: {
           200: OrderResponse,
@@ -118,6 +130,9 @@ export default async function orderRoutes(fastify: FastifyInstance) {
     {
       preHandler: [fastify.authorize(["CUSTOMER"])],
       schema: {
+        tags: ["Orders"],
+        summary: "Annuler une commande (CUSTOMER)",
+        security: [{ bearerAuth: [] }],
         response: {
           200: OrderResponse,
           400: ErrorResponse,
@@ -138,6 +153,9 @@ export default async function orderRoutes(fastify: FastifyInstance) {
     {
       preHandler: [fastify.authorize(["RESTAURANT_OWNER"])],
       schema: {
+        tags: ["Orders"],
+        summary: "Commandes d'un restaurant (RESTAURANT_OWNER)",
+        security: [{ bearerAuth: [] }],
         response: {
           200: Type.Array(OrderResponse),
           403: ErrorResponse,

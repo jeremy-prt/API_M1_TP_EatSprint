@@ -27,6 +27,8 @@ export default async function restaurantRoutes(fastify: FastifyInstance) {
     "/",
     {
       schema: {
+        tags: ["Restaurants"],
+        summary: "Lister les restaurants",
         querystring: RestaurantQuery,
         response: {
           200: PaginatedResponse(RestaurantResponse),
@@ -49,6 +51,9 @@ export default async function restaurantRoutes(fastify: FastifyInstance) {
     {
       preHandler: [fastify.authorize(["ADMIN"])],
       schema: {
+        tags: ["Restaurants"],
+        summary: "Créer un restaurant (ADMIN)",
+        security: [{ bearerAuth: [] }],
         body: CreateRestaurantBody,
         response: {
           201: RestaurantResponse,
@@ -67,6 +72,9 @@ export default async function restaurantRoutes(fastify: FastifyInstance) {
     {
       preHandler: [fastify.authorize(["RESTAURANT_OWNER"])],
       schema: {
+        tags: ["Restaurants"],
+        summary: "Mes restaurants (RESTAURANT_OWNER)",
+        security: [{ bearerAuth: [] }],
         response: {
           200: Type.Array(RestaurantResponse),
         },
@@ -86,6 +94,9 @@ export default async function restaurantRoutes(fastify: FastifyInstance) {
     {
       preHandler: [fastify.authorize(["RESTAURANT_OWNER"])],
       schema: {
+        tags: ["Restaurants"],
+        summary: "Modifier un restaurant",
+        security: [{ bearerAuth: [] }],
         body: UpdateRestaurantBody,
         response: {
           200: RestaurantResponse,
@@ -110,6 +121,9 @@ export default async function restaurantRoutes(fastify: FastifyInstance) {
     {
       preHandler: [fastify.authorize(["RESTAURANT_OWNER"])],
       schema: {
+        tags: ["Restaurants"],
+        summary: "Supprimer un restaurant",
+        security: [{ bearerAuth: [] }],
         response: {
           200: Type.Object({ success: Type.Boolean() }),
           403: ErrorResponse,

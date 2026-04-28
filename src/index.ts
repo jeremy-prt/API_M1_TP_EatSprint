@@ -3,6 +3,7 @@ import Fastify, { type FastifyError } from "fastify";
 import cors from "@fastify/cors";
 import helmet from "@fastify/helmet";
 import websocket from "@fastify/websocket";
+import swaggerPlugin from "./plugins/swagger.js";
 import jwtPlugin from "./plugins/jwt.js";
 import authDecorators from "./decorators/auth.js";
 import authRoutes from "./routes/auth.js";
@@ -51,13 +52,15 @@ server.register(helmet, {
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com"],
-      connectSrc: ["'self'", "https://unpkg.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      connectSrc: ["'self'"],
       imgSrc: ["'self'", "data:"],
+      workerSrc: ["blob:"],
     },
   },
 });
+server.register(swaggerPlugin);
 server.register(websocket);
 server.register(jwtPlugin);
 server.register(authDecorators);

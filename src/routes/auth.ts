@@ -31,6 +31,8 @@ export default async function authRoutes(fastify: FastifyInstance) {
     "/register",
     {
       schema: {
+        tags: ["Auth"],
+        summary: "Créer un compte",
         body: RegisterBody,
         response: {
           201: AuthResponse,
@@ -51,6 +53,8 @@ export default async function authRoutes(fastify: FastifyInstance) {
     "/login",
     {
       schema: {
+        tags: ["Auth"],
+        summary: "Se connecter",
         body: LoginBody,
         response: {
           200: AuthResponse,
@@ -71,6 +75,8 @@ export default async function authRoutes(fastify: FastifyInstance) {
     "/refresh",
     {
       schema: {
+        tags: ["Auth"],
+        summary: "Rafraîchir le token d'accès",
         body: RefreshBody,
         response: {
           200: AuthResponse,
@@ -92,6 +98,8 @@ export default async function authRoutes(fastify: FastifyInstance) {
     "/logout",
     {
       schema: {
+        tags: ["Auth"],
+        summary: "Se déconnecter",
         body: RefreshBody,
         response: {
           200: Type.Object({ success: Type.Boolean() }),
@@ -109,6 +117,9 @@ export default async function authRoutes(fastify: FastifyInstance) {
     {
       preHandler: [fastify.authenticate],
       schema: {
+        tags: ["Auth"],
+        summary: "Profil de l'utilisateur connecté",
+        security: [{ bearerAuth: [] }],
         response: {
           200: MeResponse,
           401: ErrorResponse,

@@ -24,6 +24,9 @@ export default async function adminRoutes(fastify: FastifyInstance) {
     "/users",
     {
       schema: {
+        tags: ["Admin"],
+        summary: "Lister tous les utilisateurs",
+        security: [{ bearerAuth: [] }],
         response: {
           200: Type.Array(UserResponse),
         },
@@ -39,6 +42,9 @@ export default async function adminRoutes(fastify: FastifyInstance) {
     "/users",
     {
       schema: {
+        tags: ["Admin"],
+        summary: "Créer un utilisateur",
+        security: [{ bearerAuth: [] }],
         body: CreateUserBody,
         response: {
           201: Type.Object({ user: UserResponse }),
@@ -59,6 +65,9 @@ export default async function adminRoutes(fastify: FastifyInstance) {
     "/users/:userId",
     {
       schema: {
+        tags: ["Admin"],
+        summary: "Modifier un utilisateur",
+        security: [{ bearerAuth: [] }],
         body: UpdateUserAdminBody,
         response: {
           200: Type.Object({ user: UserResponse }),
@@ -78,6 +87,9 @@ export default async function adminRoutes(fastify: FastifyInstance) {
     "/users/:userId",
     {
       schema: {
+        tags: ["Admin"],
+        summary: "Supprimer un utilisateur",
+        security: [{ bearerAuth: [] }],
         response: {
           200: Type.Object({ success: Type.Boolean() }),
           403: ErrorResponse,
@@ -96,6 +108,9 @@ export default async function adminRoutes(fastify: FastifyInstance) {
     "/restaurants",
     {
       schema: {
+        tags: ["Admin"],
+        summary: "Lister tous les restaurants",
+        security: [{ bearerAuth: [] }],
         response: {
           200: Type.Array(RestaurantResponse),
         },
@@ -114,6 +129,9 @@ export default async function adminRoutes(fastify: FastifyInstance) {
     "/restaurants/:restaurantId",
     {
       schema: {
+        tags: ["Admin"],
+        summary: "Assigner un propriétaire à un restaurant",
+        security: [{ bearerAuth: [] }],
         body: AssignOwnerBody,
         response: {
           200: RestaurantResponse,

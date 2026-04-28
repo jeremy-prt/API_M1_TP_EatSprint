@@ -11,6 +11,9 @@ export default async function userRoutes(fastify: FastifyInstance) {
     {
       preHandler: [fastify.authenticate],
       schema: {
+        tags: ["Users"],
+        summary: "Mon profil",
+        security: [{ bearerAuth: [] }],
         response: {
           200: Type.Object({ user: UserResponse }),
           401: ErrorResponse,
@@ -28,6 +31,9 @@ export default async function userRoutes(fastify: FastifyInstance) {
     {
       preHandler: [fastify.authenticate],
       schema: {
+        tags: ["Users"],
+        summary: "Modifier mon profil",
+        security: [{ bearerAuth: [] }],
         body: UpdateUserBody,
         response: {
           200: Type.Object({ user: UserResponse }),
@@ -46,6 +52,9 @@ export default async function userRoutes(fastify: FastifyInstance) {
     {
       preHandler: [fastify.authenticate],
       schema: {
+        tags: ["Users"],
+        summary: "Supprimer mon compte",
+        security: [{ bearerAuth: [] }],
         response: {
           200: Type.Object({ success: Type.Boolean() }),
         },
